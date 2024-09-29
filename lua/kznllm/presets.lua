@@ -175,6 +175,10 @@ local function anthropic_debug_fn(data, ns_id, extmark_id, opts)
   vim.cmd 'normal! zz'
 end
 
+local function show_popup_message(content)
+  vim.api.nvim_echo({{content, "WarningMsg"}}, true, {})
+end
+
 --- Working implementation of "inline" fill mode
 --- Invokes an LLM via a supported API spec defined by
 ---
@@ -209,6 +213,8 @@ function M.invoke_llm(make_data_fn, make_curl_args_fn, make_job_fn, opts)
           M.PROMPT_ARGS_STATE.keywords = keywords_input
         end
         M.PROMPT_ARGS_STATE.user_query = vim.fn.system(string.format("echo '%s' | /home/daniel/Documents/cpp/build/logseq-logic", input))
+
+        show_popup_message(M.PROMPT_ARGS_STATE.user_query)
 
         if vim.v.shell_error ~= 0 then
           print("Error executing command logseq-logic: ", M.PROMPT_ARGS_STATE.user_query)
