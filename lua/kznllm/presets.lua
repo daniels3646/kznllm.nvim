@@ -141,7 +141,6 @@ local function openai_debug_fn(data, ns_id, extmark_id, opts)
   kznllm.write_content_at_extmark('model: ' .. opts.model, ns_id, extmark_id)
   for _, message in ipairs(data.messages) do
     kznllm.write_content_at_extmark('\n\n---\n\n', ns_id, extmark_id)
-    kznllm.write_content_at_extmark(message.role .. ':\n\n', ns_id, extmark_id)
     kznllm.write_content_at_extmark(message.content, ns_id, extmark_id)
   end
   if not (M.PROMPT_ARGS_STATE.replace and opts.prefill) then
@@ -204,6 +203,18 @@ function M.invoke_llm(make_data_fn, make_curl_args_fn, make_job_fn, opts)
       M.PROMPT_ARGS_STATE.context_files = kznllm.get_project_files(context_dir, opts)
     end
 
+    if opts and opts.pkm then
+      vim.ui.input({ prompt = 'keywords: ' }, function(keywords_input)
+        if keywords_input ~= nil then
+          M.PROMPT_ARGS_STATE.keywords = keywords_input
+        end
+        M.PROMPT_ARGS_STATE.user_query = vim.fn.system(string.format("echo '%s' | /home/daniel/Documents/cpp/build/logseq-logic", input))
+
+        if vim.v.shell_error ~= 0 then
+          print("Error executing command logseq-logic: ", M.PROMPT_ARGS_STATE.user_query)
+        end
+      end)
+    end
     -- don't update current context if scratch buffer is open
 
     if not vim.b.debug then
@@ -302,6 +313,21 @@ end
 presets = {
   {
     id = 'chat-model',
+    provider = 'openai',
+    make_data_fn = make_data_for_openai_chat,
+    opts = {
+      model = 'gpt-4o',
+      data_params = {
+        max_tokens = 4096,
+        temperature = 0.7,
+      },
+      debug_fn = openai_debug_fn,
+      base_url = 'https://api.openai.com',
+      endpoint = '/v1/chat/completions',
+    },
+  },
+  {
+    id = 'chat-model',
     provider = 'groq',
     make_data_fn = make_data_for_openai_chat,
     opts = {
@@ -351,21 +377,6 @@ presets = {
       debug_fn = anthropic_debug_fn,
       base_url = 'https://api.anthropic.com',
       endpoint = '/v1/messages',
-    },
-  },
-  {
-    id = 'chat-model',
-    provider = 'openai',
-    make_data_fn = make_data_for_openai_chat,
-    opts = {
-      model = 'gpt-4o-mini',
-      data_params = {
-        max_tokens = 16384,
-        temperature = 0.7,
-      },
-      debug_fn = openai_debug_fn,
-      base_url = 'https://api.openai.com',
-      endpoint = '/v1/chat/completions',
     },
   },
   {
