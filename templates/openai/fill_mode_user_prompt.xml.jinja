@@ -1,0 +1,30 @@
+{% if current_buffer_path or current_buffer_context or context_files %}
+CONTEXT CODE:
+{% endif %}
+{% if current_buffer_path %}
+Document:0
+Title: {{ current_buffer_path }}
+{% endif %}
+{% if current_buffer_context %}
+Content:
+```{{ current_buffer_filetype }}
+{{ current_buffer_context }}
+```
+{% endif %}
+{% if context_files %}
+  {% for file in context_files %}
+Document:{{ loop.index }}
+Title: {{ file.path }}
+Content:
+```
+{{ file.content }}
+```
+  {% endfor %}
+{% endif %}
+{% if visual_selection %}
+SELECTED CODE:
+```{{ current_buffer_filetype }}
+{{ visual_selection }}
+```
+{% endif %}
+QUERY: {{ user_query }}
