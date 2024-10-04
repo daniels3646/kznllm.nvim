@@ -325,7 +325,7 @@ presets = {
       model = 'gpt-4o',
       data_params = {
         max_tokens = 4096,
-        temperature = 0.7,
+        temperature = 0,
       },
       debug_fn = openai_debug_fn,
       base_url = 'https://api.openai.com',
